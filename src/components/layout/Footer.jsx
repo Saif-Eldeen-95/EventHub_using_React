@@ -22,6 +22,7 @@ function Footer() {
 
             <div className="footer__bottom">
                 <p>&copy; {new Date().getFullYear()} EventHub. All rights reserved.</p>
+                <p>Live event data powered by StungEvents.</p>
             </div>
         </footer>
     );

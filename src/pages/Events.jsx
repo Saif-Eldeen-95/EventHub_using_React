@@ -5,12 +5,11 @@ import Loader from '../components/ui/Loader';
 import EmptyState from '../components/ui/EmptyState';
 import './Events.css';
 
-const CATEGORIES = ['All', 'Tech', 'Sports', 'Career', 'Art', 'Workshop'];
-
 function Events() {
-    const { events, loading, error, isRegistered, registerEvent, unregisterEvent } = useEvents();
+    const { events, loading, error, isRegistered, registerEvent, unregisterEvent, refreshEvents } = useEvents();
     const [query, setQuery] = useState('');
     const [category, setCategory] = useState('All');
+    const categories = [...new Set(events.map((event) => event.category).filter(Boolean))].sort();
 
     const filteredEvents = events.filter((event) => {
         const matchesQuery = event.title.toLowerCase().includes(query.trim().toLowerCase());
@@ -41,14 +40,22 @@ function Events() {
                     onChange={(e) => setCategory(e.target.value)}
                     aria-label="Filter by category"
                 >
-                    {CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat}>{cat === 'All' ? 'All Categories' : cat}</option>
+                    <option value="All">All Categories</option>
+                    {categories.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
                     ))}
                 </select>
             </div>
 
             {loading && <Loader />}
-            {error && <p className="events-page__error">{error}</p>}
+            {error && (
+                <div className="events-page__error">
+                    <p>{error}</p>
+                    <button type="button" className="btn btn--primary" onClick={refreshEvents}>
+                        Try Again
+                    </button>
+                </div>
+            )}
 
             {!loading && !error && (
                 <>

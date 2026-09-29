@@ -30,16 +30,10 @@
     font-size: 0.75rem;
     font-weight: 700;
     color: var(--color-white);
+    background-color: var(--category-color, var(--color-turquoise));
     letter-spacing: 0.02em;
     text-transform: uppercase;
 }
-
-.event-card__badge--tech { background-color: var(--color-turquoise); }
-.event-card__badge--sports { background-color: var(--color-error); }
-.event-card__badge--career { background-color: #10B981; }
-.event-card__badge--art { background-color: var(--color-turquoise-light); }
-.event-card__badge--workshop { background-color: var(--color-dark-turquoise); }
-.event-card__badge--default { background-color: var(--color-turquoise); }
 
 .event-card__favorite {
     background: transparent;

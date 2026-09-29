@@ -1,24 +1,18 @@
 import { useNavigate } from 'react-router-dom';
 import Button from './Button';
 import { useEvents } from '../../context/EventContext';
+import { getCategoryColor } from '../../services/eventService';
 import './EventCard.css';
-
-const CATEGORY_CLASS = {
-    Tech: 'event-card__badge--tech',
-    Sports: 'event-card__badge--sports',
-    Career: 'event-card__badge--career',
-    Art: 'event-card__badge--art',
-    Workshop: 'event-card__badge--workshop',
-};
 
 function EventCard({ event, isRegistered, onRegister, onUnregister }) {
     const navigate = useNavigate();
-    const { isFavorite, toggleFavorite } = useEvents();
+    const { events, isFavorite, toggleFavorite } = useEvents();
     const favorite = isFavorite(event?.id);
 
     if (!event) return null;
 
-    const badgeClass = CATEGORY_CLASS[event.category] || 'event-card__badge--default';
+    const categories = [...new Set(events.map((item) => item.category).filter(Boolean))].sort();
+    const badgeColor = getCategoryColor(event.category, categories);
 
     function handleRegisterClick(e) {
         e.stopPropagation();
@@ -32,7 +26,7 @@ function EventCard({ event, isRegistered, onRegister, onUnregister }) {
     return (
         <div className="event-card" onClick={() => navigate(`/events/${event.id}`)}>
             <div className="event-card__header">
-                <span className={`event-card__badge ${badgeClass}`}>{event.category}</span>
+                <span className="event-card__badge" style={{ '--category-color': badgeColor }}>{event.category}</span>
                 <button
                     type="button"
                     className={`event-card__favorite${favorite ? ' event-card__favorite--active' : ''}`}
