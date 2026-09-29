@@ -40,14 +40,50 @@ function CreateEvents() {
 
     function validate() {
         const newErrors = {};
-        if (!form.title.trim()) newErrors.title = 'Please provide a valid event name.';
+        const selectedDateTime = form.date && form.time
+            ? new Date(`${form.date}T${form.time}`)
+            : null;
+
+        if (!form.title.trim()) {
+            newErrors.title = 'Please provide an event name.';
+        } else if (form.title.trim().length < 3) {
+            newErrors.title = 'Event name must be at least 3 characters.';
+        }
+
         if (!form.category) newErrors.category = 'Please select a category.';
-        if (!form.location.trim()) newErrors.location = 'Please provide a valid location.';
-        if (!form.seats || Number(form.seats) <= 0) newErrors.seats = 'Please provide a valid number of seats.';
-        if (!form.date) newErrors.date = 'Please provide a valid date.';
-        if (!form.time) newErrors.time = 'Please provide a valid time.';
-        if (!form.description.trim()) newErrors.description = 'Please provide a description.';
-        if (!form.agreeToTerms) newErrors.agreeToTerms = 'You must agree before submitting.';
+
+        if (!form.location.trim()) {
+            newErrors.location = 'Please provide a location.';
+        } else if (form.location.trim().length < 3) {
+            newErrors.location = 'Location must be at least 3 characters.';
+        }
+
+        if (!form.seats || !Number.isInteger(Number(form.seats)) || Number(form.seats) <= 0) {
+            newErrors.seats = 'Seats must be a positive whole number.';
+        }
+
+        if (!form.date) {
+            newErrors.date = 'Please select a date.';
+        } else if (form.date < today) {
+            newErrors.date = 'Event date cannot be in the past.';
+        }
+
+        if (!form.time) newErrors.time = 'Please select a time.';
+
+        if (selectedDateTime && selectedDateTime < new Date()) {
+            newErrors.time = 'Event date and time must be in the future.';
+        }
+
+        if (!form.description.trim()) {
+            newErrors.description = 'Please provide a description.';
+        } else if (form.description.trim().length < 20) {
+            newErrors.description = 'Description must be at least 20 characters.';
+        }
+
+        if (!form.agreeToTerms) {
+            newErrors.agreeToTerms = 'You must agree before submitting.';
+        }
+
         return newErrors;
     }
 
