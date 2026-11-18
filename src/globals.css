@@ -1,38 +1,38 @@
+
 /* =========================================
-   EventHub – Saif Eldeen Brand Design System
-   Mint Green / Dark Turquoise visual identity
+   EventHub – Midnight Ocean / Premium Identity
    ========================================= */
 
 :root {
     /* Brand palette */
-    --color-mint: #34D399;
-    --color-mint-light: #D1FAE5;
-    --color-mint-soft: #E8FFF4;
+    --color-mint: #7FB3B8;
+    --color-mint-light: #D5E8E7;
+    --color-mint-soft: #EDF5F3;
     --color-dark-turquoise: #0F3D3E;
-    --color-turquoise: #146C72;
-    --color-turquoise-light: #2A9D8F;
-    --color-white: #FFFFFF;
-    --color-black: #0B1717;
+    --color-turquoise: #2E6F73;
+    --color-turquoise-light: #7FB3B8;
+    --color-white: #EADCC8;
+    --color-black: #0A0F14;
 
     /* Semantic colors - Light */
     --color-primary: var(--color-dark-turquoise);
     --color-primary-dark: var(--color-turquoise);
     --color-secondary: var(--color-turquoise-light);
-    --color-accent: var(--color-mint);
+    --color-accent: #C6601F;
 
-    --color-bg: #FFFFFF;
-    --color-background: #FFFFFF;
-    --color-surface: var(--color-mint-light);
+    --color-bg: #EADCC8;
+    --color-background: #EADCC8;
+    --color-surface: #EDF5F3;
     --color-surface-alt: #FFFFFF;
 
-    --color-text: var(--color-dark-turquoise);
-    --color-text-muted: #315B5D;
-    --color-card-text: var(--color-dark-turquoise);
-    --color-card-muted: var(--color-black);
+    --color-text: #0A0F14;
+    --color-text-muted: #536B6C;
+    --color-card-text: #0F3D3E;
+    --color-card-muted: #536B6C;
     --color-border: rgba(15, 61, 62, 0.16);
 
-    --color-success: #10B981;
-    --color-error: #C94C4C;
+    --color-success: #2E6F73;
+    --color-error: #C6601F;
 
     /* Spacing */
     --spacing-1: 0.25rem;
@@ -46,7 +46,8 @@
     --spacing-12: 3rem;
 
     /* Typography */
-    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-sans: 'Inter', system-ui, -apple-system,
+        BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --font-size-sm: 0.875rem;
     --font-size-base: 1rem;
     --font-size-lg: 1.125rem;
@@ -60,10 +61,10 @@
     --radius-lg: 0.875rem;
     --radius-full: 9999px;
 
-    /* Brand effects - dark turquoise in light mode */
-    --shadow-sm: 0 2px 8px rgba(15, 61, 62, 0.12);
-    --shadow-md: 0 10px 30px rgba(15, 61, 62, 0.18);
-    --shadow-brand: 0 8px 28px rgba(15, 61, 62, 0.22);
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(10, 15, 20, 0.10);
+    --shadow-md: 0 10px 30px rgba(10, 15, 20, 0.15);
+    --shadow-brand: 0 8px 28px rgba(46, 111, 115, 0.24);
 }
 
 /* Reset & Base */
@@ -73,7 +74,9 @@
     padding: 0;
 }
 
-html { scroll-behavior: smooth; }
+html {
+    scroll-behavior: smooth;
+}
 
 body {
     font-family: var(--font-sans);
@@ -86,11 +89,14 @@ body {
 }
 
 a {
-    color: var(--color-turquoise-light);
+    color: var(--color-turquoise);
     text-decoration: none;
 }
 
-a:hover { text-decoration: underline; }
+a:hover {
+    color: #C6601F;
+    text-decoration: underline;
+}
 
 img, video {
     max-width: 100%;
@@ -105,30 +111,31 @@ button {
 /* =========================================
    Dark theme
    ========================================= */
+
 :root[data-theme='dark'] {
-    --color-primary: var(--color-mint);
-    --color-primary-dark: var(--color-turquoise-light);
-    --color-secondary: var(--color-mint);
-    --color-accent: var(--color-mint);
+    --color-primary: #7FB3B8;
+    --color-primary-dark: #2E6F73;
+    --color-secondary: #7FB3B8;
+    --color-accent: #C6601F;
 
-    --color-bg: var(--color-dark-turquoise);
-    --color-background: var(--color-dark-turquoise);
-    --color-surface: var(--color-white);
-    --color-surface-alt: #F7FFFB;
+    --color-bg: #0A0F14;
+    --color-background: #0A0F14;
+    --color-surface: #0F3D3E;
+    --color-surface-alt: #163F42;
 
-    --color-text: var(--color-white);
-    --color-text-muted: #BCEBDD;
-    --color-card-text: var(--color-mint);
-    --color-card-muted: var(--color-dark-turquoise);
-    --color-border: rgba(52, 211, 153, 0.28);
+    --color-text: #EADCC8;
+    --color-text-muted: #A9C2C1;
+    --color-card-text: #EADCC8;
+    --color-card-muted: #B8D0CE;
+    --color-border: rgba(127, 179, 184, 0.22);
 
-    --color-success: var(--color-mint);
-    --color-error: #FF8B8B;
+    --color-success: #7FB3B8;
+    --color-error: #E58A61;
 
-    /* Brand effects - mint in dark mode */
-    --shadow-sm: 0 2px 10px rgba(52, 211, 153, 0.16);
-    --shadow-md: 0 10px 30px rgba(52, 211, 153, 0.22);
-    --shadow-brand: 0 8px 30px rgba(52, 211, 153, 0.28);
+    /* Shadows */
+    --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.35);
+    --shadow-brand: 0 8px 30px rgba(46, 111, 115, 0.25);
 }
 
 html, body, #root {
@@ -136,7 +143,8 @@ html, body, #root {
 }
 
 * {
-    transition-property: background-color, border-color, color, box-shadow;
+    transition-property: background-color, border-color,
+        color, box-shadow;
     transition-duration: 0.2s;
     transition-timing-function: ease;
 }

@@ -52,8 +52,8 @@ export function EventProvider({ children }) {
             const data = await getEvents();
             const createdEvents = readStoredArray(STORAGE_KEYS.createdEvents);
             setEvents([...createdEvents, ...data]);
-        } catch {
-            setError('Failed to load events. Please try again later.');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to load events. Please try again later.');
         } finally {
             setLoading(false);
         }

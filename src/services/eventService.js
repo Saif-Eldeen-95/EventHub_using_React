@@ -1,10 +1,14 @@
-const API_BASE_URL = 'https://api.stungevents.com';
+
+const API_BASE_URL = 'https://app.ticketmaster.com/discovery/v2';
 const EVENTS_LIMIT = 30;
 
-function formatDate(isoDate) {
-    if (!isoDate) return 'Date TBA';
+// Set VITE_TICKETMASTER_API_KEY in your local .env file.
+const API_KEY = import.meta.env.VITE_TICKETMASTER_API_KEY;
 
-    const date = new Date(isoDate);
+function formatDate(dateValue) {
+    if (!dateValue) return 'Date TBA';
+
+    const date = new Date(dateValue);
     if (Number.isNaN(date.getTime())) return 'Date TBA';
 
     return date.toLocaleDateString('en-US', {
@@ -14,22 +18,32 @@ function formatDate(isoDate) {
     });
 }
 
-function formatTime(isoDate) {
-    if (!isoDate) return 'Time TBA';
+function formatTime(dateTime, localTime) {
+    if (dateTime) {
+        const date = new Date(dateTime);
+        if (!Number.isNaN(date.getTime())) {
+            return date.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+            });
+        }
+    }
 
-    const date = new Date(isoDate);
-    if (Number.isNaN(date.getTime())) return 'Time TBA';
+    if (localTime && typeof localTime === 'object' && Number.isInteger(localTime.hourOfDay)) {
+        const date = new Date();
+        date.setHours(localTime.hourOfDay, localTime.minuteOfHour || 0, 0, 0);
+        return date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+        });
+    }
 
-    return date.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-    });
+    return typeof localTime === 'string' ? localTime : 'Time TBA';
 }
 
 function mapCategory(category = '') {
     if (!category) return 'Other';
 
-    // Turn API slugs like "free-events" or "night_in" into "Free Events".
     return category
         .replace(/[-_]+/g, ' ')
         .trim()
@@ -48,64 +62,105 @@ export function getCategoryColor(category = '', categories = [category]) {
 }
 
 function normalizeEvent(event) {
-    const startDate = event.start_utc || event.start || event.start_date;
+    const start = event.dates?.start || {};
+    const venue = event._embedded?.venues?.[0] || {};
+
+    const classification = event.classifications?.find((item) => item.primary)
+        || event.classifications?.[0]
+        || {};
+
+    const category = classification.genre?.name
+        || classification.segment?.name
+        || classification.subGenre?.name
+        || 'Other';
+
+    const location = [
+        venue.name,
+        venue.city?.name,
+        venue.state?.stateCode || venue.state?.name,
+        venue.country?.name,
+    ].filter(Boolean).join(', ');
+
+    const image = [...(event.images || [])]
+        .sort((a, b) => (b.width || 0) - (a.width || 0))[0]?.url || '';
 
     return {
-        id: event.slug || event.id,
-        title: event.title || 'Untitled Event',
-        category: mapCategory(event.category, event.title),
-        date: formatDate(startDate),
-        time: formatTime(startDate),
-        location: [event.venue_name, event.city].filter(Boolean).join(', ') || 'Location TBA',
-        seats: event.capacity || 'N/A',
-        description:
-            event.description ||
-            `Join this event in ${event.city || 'the selected city'} and discover more details from the organizer.`,
-        ticketUrl: event.ticket_url || '',
-        sourceUrl: event.url || event.ticket_url || '',
-        rawCategory: event.category || '',
+        id: event.id,
+        title: event.name || 'Untitled Event',
+        category: mapCategory(category),
+        date: formatDate(start.dateTime || start.localDate),
+        time: formatTime(start.dateTime, start.localTime),
+        location: location || 'Location TBA',
+        seats: 'N/A',
+        description: event.info || event.pleaseNote || 'Event details are available from the organizer.',
+        ticketUrl: event.url || '',
+        sourceUrl: event.url || '',
+        image,
+        rawCategory: category,
     };
 }
 
 async function request(url) {
-    const response = await fetch(url);
-
-    if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}.`);
+    if (!API_KEY) {
+        throw new Error(
+            'Missing Ticketmaster API key. Add VITE_TICKETMASTER_API_KEY to your .env file and restart the dev server.'
+        );
     }
 
-    const data = await response.json();
+    const response = await fetch(url);
+    const data = await response.json().catch(() => null);
 
-    if (data.ok === false) {
-        throw new Error(data.error || 'The events API returned an error.');
+    if (!response.ok) {
+        const apiMessage = data?.fault?.faultstring || data?.errors?.[0]?.detail;
+        throw new Error(apiMessage || `Ticketmaster API request failed (${response.status}).`);
     }
 
     return data;
 }
 
-/** Fetch upcoming events from the public API. */
-export async function getEvents() {
+function buildEventsUrl(options = {}) {
+    const {
+        keyword,
+        countryCode,
+        city,
+        classificationName,
+        size = EVENTS_LIMIT,
+    } = options;
+
     const params = new URLSearchParams({
-        limit: String(EVENTS_LIMIT),
+        apikey: API_KEY || '',
+        size: String(size),
+        sort: 'date,asc',
     });
 
-    const data = await request(`${API_BASE_URL}/events?${params.toString()}`);
+    if (keyword) params.set('keyword', keyword);
+    if (countryCode) params.set('countryCode', countryCode);
+    if (city) params.set('city', city);
+    if (classificationName) params.set('classificationName', classificationName);
 
-    return (data.events || []).map(normalizeEvent);
+    return `${API_BASE_URL}/events.json?${params.toString()}`;
 }
 
-/** Fetch one event by its public slug/id. */
+/** Fetch upcoming events. Optional filters: keyword, countryCode, city, classificationName, size. */
+export async function getEvents(options = {}) {
+    const data = await request(buildEventsUrl(options));
+    return (data._embedded?.events || []).map(normalizeEvent);
+}
+
+/** Fetch one event by its Ticketmaster event ID. */
 export async function getEventById(id) {
-    const data = await request(`${API_BASE_URL}/events/${encodeURIComponent(id)}`);
-    return data.event ? normalizeEvent(data.event) : null;
+    const params = new URLSearchParams({
+        apikey: API_KEY || '',
+    });
+
+    const data = await request(
+        `${API_BASE_URL}/events/${encodeURIComponent(id)}.json?${params.toString()}`
+    );
+
+    return data ? normalizeEvent(data) : null;
 }
 
-/**
- * Create an event locally.
- *
- * The public API is read-only, so user-created events are persisted
- * by EventContext in localStorage instead of being sent to the API.
- */
+/** Create an event locally; user-created events remain in localStorage. */
 export async function createEvent(eventData) {
     return {
         id: `local-${Date.now()}`,
@@ -113,7 +168,7 @@ export async function createEvent(eventData) {
     };
 }
 
-/** Kept as service placeholders for future backend integration. */
+/** Service placeholders for future backend integration. */
 export async function updateEvent(id, updates) {
     return { id, ...updates };
 }
